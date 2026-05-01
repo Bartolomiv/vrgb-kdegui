@@ -2,7 +2,7 @@
 
 set -e
 
-echo "VRGB Uninstaller (v0.3) (v0.3)"
+echo "VRGB Uninstaller (v0.3.5)"
 echo "----------------"
 
 echo "[1/4] Removing binary..."

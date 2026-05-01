@@ -23,17 +23,19 @@ VRGB is just a tool built around that discovery to get simple RGB control workin
 **The project was developed and validated on:**
 
 ITE5570 (HID_ID: 0018:00000B05:000019B6)  
-- ASUS Vivobook S14 (S5406SA-WH79)  
+- ASUS Vivobook S14 series (S5406SA / S5406SA-WH79)  
 - firmware: 0x0B  
 - color: 0x05  
+- note: some 0x19B6 systems may require `asus-nb-wmi` to be loaded before HID control works  
 
 **Community validated:**
 
 ITE5570 (HID_ID: 0018:00000B05:00005570)  
-- ASUS Vivobook S16 series (M5606K / M5606WA)  
+- ASUS Vivobook S series  
+- confirmed on S16 M5606K, S16 M5606WA, and S14 M5406WA  
 - firmware: 0x46  
 - color: 0x45  
-- note: OEM rainbow may not function on all models  
+- note: OEM rainbow mode may not function on all models  
 
 <br>
 
@@ -52,7 +54,7 @@ Unlike some RGB tools, VRGB does not rely on kernel patches, vendor utilities, b
        ↓
     RGB lighting
 
-Current Stable Release: v.0.3.1
+Current Stable Release: v0.3.5
     
 
 ## Example Usage
@@ -68,8 +70,9 @@ Current Stable Release: v.0.3.1
 -   Fine brightness scaling (0–100%)
 -   Custom profiles
 -   Firmware autonomous mode toggle
--   OEM rainbow toggle (sudo required)
+-   OEM rainbow toggle (sudo required, model-dependent)
 -   Debug diagnostics
+-   Required module checks for affected devices
 -   Persistent configuration
 -   Installer and uninstaller included
 -   Non-root daily usage via udev permissions
@@ -81,25 +84,33 @@ Current Stable Release: v.0.3.1
 
 VRGB supports ASUS laptops that expose the **ITE5570 HID LampArray controller**.
 
-Support is based on **verified device mappings**, not specific laptop models.
+Support is based on **verified device mappings**, not specific laptop models. Some ASUS laptops share the same HID controller and report IDs across different screen sizes and CPU platforms.
 
 ### Verified mappings
 
 **ITE5570 (HID_ID: 0018:00000B05:000019B6)**  
-- confirmed on: ASUS Vivobook S14 (S5406SA)  
+- confirmed on: ASUS Vivobook S14 series (S5406SA / S5406SA-WH79)  
 - firmware report: `0x0B`  
 - color report: `0x05`
+- required module: `asus-nb-wmi`
+- OEM rainbow: supported on validated S5406SA hardware, but may vary by model/firmware
 
 **ITE5570 (HID_ID: 0018:00000B05:00005570)**  
-- confirmed on: ASUS Vivobook S16 series (M5606K / M5606WA)  
+- confirmed on:
+  - ASUS Vivobook S16 (M5606K)
+  - ASUS Vivobook S16 (M5606WA)
+  - ASUS Vivobook S14 (M5406WA)
 - firmware report: `0x46`  
 - color report: `0x45`  
-- note: OEM rainbow mode may not function on all models
+- OEM rainbow: not supported / not exposed in current community reports
 
 ### Example device identifiers
 
     HID_NAME=ITE5570:00 0B05:19B6
     HID_ID=0018:00000B05:000019B6
+
+    HID_NAME=ITE5570:00 0B05:5570
+    HID_ID=0018:00000B05:00005570
 
 
 ## Compatibility
@@ -109,6 +120,26 @@ VRGB scans available `hidraw` devices and selects compatible ASUS keyboard contr
 Multiple ASUS laptops appear to share the same ITE5570 controller and HID LampArray protocol. If your system exposes a similar device, there is a strong chance VRGB will work.
 
 Support expands through **verified device mappings** as new hardware is tested. Stability and correctness are prioritized over broad but unreliable compatibility.
+
+### Required modules
+
+Some ITE5570 systems may ignore HID LampArray commands until the ASUS WMI module has initialized the hardware.
+
+For affected mappings, VRGB checks whether the required module is loaded and prints clear instructions if it is missing.
+
+Example manual load:
+
+    sudo modprobe asus-nb-wmi
+
+Example load at boot:
+
+    echo asus-nb-wmi | sudo tee /etc/modules-load.d/asus-nb-wmi.conf
+
+### OEM rainbow mode
+
+Static RGB control uses the HID path and is the core of VRGB.
+
+OEM rainbow mode uses a separate ASUS WMI path and is model-dependent. On some supported devices, the WMI debug interface may exist but expose no usable lighting device. In those cases, static RGB control should still work normally.
 
 If VRGB works (or does not work) on your system, please submit a compatibility report including:
 
@@ -266,15 +297,24 @@ Removes:
 ## Future Development
 
 - expanded ASUS hardware compatibility
-- GUI frontend
-- breathing / fade effects
-- effect profiles
+- simple GUI frontend
+- color picker / brightness control
+- profile management
 
 With future updates in mind, this project will aim to continue to be as efficient and lightweight as possible.
 
 
 
 ## Changelog
+
+v0.3.5
+
+- refined shared Vivobook S-series ITE5570 device mappings
+- added ASUS Vivobook S14 M5406WA to community validated hardware
+- added required kernel module checks for affected ITE5570 systems
+- improved OEM rainbow capability handling for unsupported WMI paths
+- updated status output with confirmed models, required modules, and rainbow support
+- preserved the no-daemon, direct-HID design
 
 v0.3.1
 
