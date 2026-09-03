@@ -321,14 +321,29 @@ PlasmoidItem {
     }
 
     fullRepresentation: Item {
+        id: fullRep
+
+        readonly property int pad: Kirigami.Units.largeSpacing
+        // Height follows the content rather than a fixed guess, so the grid
+        // page is not padded out to the (much taller) editor page. Anchoring
+        // the content left/right/top only -- never filling -- keeps
+        // content.implicitHeight independent of this item's own height, so the
+        // binding cannot become circular.
+        readonly property int contentHeight: content.implicitHeight + 2 * pad
+
         Layout.minimumWidth: Kirigami.Units.gridUnit * 15
-        Layout.minimumHeight: Kirigami.Units.gridUnit * 19
         Layout.preferredWidth: Kirigami.Units.gridUnit * 17
-        Layout.preferredHeight: Kirigami.Units.gridUnit * 22
+        Layout.minimumHeight: contentHeight
+        Layout.preferredHeight: contentHeight
+        Layout.maximumHeight: contentHeight
 
         ColumnLayout {
-            anchors.fill: parent
-            anchors.margins: Kirigami.Units.largeSpacing
+            id: content
+
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.top: parent.top
+            anchors.margins: fullRep.pad
             spacing: Kirigami.Units.smallSpacing
 
             // --- header ---------------------------------------------------
@@ -390,11 +405,17 @@ PlasmoidItem {
             // --- pages ----------------------------------------------------
             StackLayout {
                 Layout.fillWidth: true
-                Layout.fillHeight: true
+                // A StackLayout's own implicit height is the tallest page, which
+                // is what left dead space under the grid. Report just the page
+                // actually on screen.
+                Layout.preferredHeight: root.page === "editor" ? editorPage.implicitHeight
+                                                               : gridPage.implicitHeight
                 currentIndex: root.page === "editor" ? 1 : 0
 
                 // page 0: profile grid
                 ColumnLayout {
+                    id: gridPage
+
                     spacing: Kirigami.Units.smallSpacing
 
                     GridLayout {
@@ -475,12 +496,9 @@ PlasmoidItem {
                         }
                     }
 
-                    Item {
-                        Layout.fillHeight: true
-                    }
-
                     RowLayout {
                         Layout.fillWidth: true
+                        Layout.topMargin: Kirigami.Units.smallSpacing
 
                         PlasmaComponents.Label {
                             text: i18n("Brightness")
@@ -528,6 +546,8 @@ PlasmoidItem {
 
                 // page 1: profile editor
                 ColumnLayout {
+                    id: editorPage
+
                     spacing: Kirigami.Units.smallSpacing
 
                     PlasmaComponents.TextField {
@@ -585,12 +605,9 @@ PlasmoidItem {
                         }
                     }
 
-                    Item {
-                        Layout.fillHeight: true
-                    }
-
                     RowLayout {
                         Layout.fillWidth: true
+                        Layout.topMargin: Kirigami.Units.smallSpacing
                         spacing: Kirigami.Units.smallSpacing
 
                         PlasmaComponents.Button {
