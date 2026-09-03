@@ -67,6 +67,10 @@ Current Stable Release: v0.3.5
   <img src="assets/plasma-widget-demo.png" width="400">
 </p>
 
+<p align="center">
+  <img src="assets/plasma-widget-colour-pick.png" width="400">
+</p>
+
 
 ## Features
 
