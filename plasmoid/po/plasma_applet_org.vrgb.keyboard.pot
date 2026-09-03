@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: VRGB Keyboard Lighting\n"
 "Report-Msgid-Bugs-To: https://github.com/vrgb-dev/vrgb/issues\n"
-"POT-Creation-Date: 2026-09-03 22:05+0300\n"
+"POT-Creation-Date: 2026-09-03 22:58+0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,22 +17,46 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: package/contents/ui/main.qml:51 package/contents/ui/main.qml:187
+#: package/contents/ui/main.qml:77 package/contents/ui/main.qml:367
 msgid "Keyboard Lighting"
 msgstr ""
 
-#: package/contents/ui/main.qml:52
+#: package/contents/ui/main.qml:78
 msgid "Reading configuration…"
 msgstr ""
 
-#: package/contents/ui/main.qml:53
+#: package/contents/ui/main.qml:79
 msgid "#%1 at %2%"
 msgstr ""
 
-#: package/contents/ui/main.qml:104
+#: package/contents/ui/main.qml:248
 msgid "vrgb exited with code %1"
 msgstr ""
 
-#: package/contents/ui/main.qml:256
+#: package/contents/ui/main.qml:343
+msgid "Back"
+msgstr ""
+
+#: package/contents/ui/main.qml:366
+msgid "New profile"
+msgstr ""
+
+#: package/contents/ui/main.qml:471
+msgid "Add profile"
+msgstr ""
+
+#: package/contents/ui/main.qml:486 package/contents/ui/main.qml:561
 msgid "Brightness"
+msgstr ""
+
+#: package/contents/ui/main.qml:538
+msgid "Profile name"
+msgstr ""
+
+#: package/contents/ui/main.qml:599
+msgid "Delete"
+msgstr ""
+
+#: package/contents/ui/main.qml:612
+msgid "Save"
 msgstr ""

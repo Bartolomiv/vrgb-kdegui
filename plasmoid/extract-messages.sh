@@ -11,6 +11,10 @@ POT="$BASE/po/$DOMAIN.pot"
 
 mkdir -p "$BASE/po"
 
+# Run from the package root so the "#:" source references in the .pot stay
+# repo-relative instead of baking in whoever's home directory built it.
+cd "$BASE"
+
 # -C -kde is the KDE extraction mode; it understands the i18n* call family and
 # parses QML well enough since the call syntax matches C++.
 xgettext --from-code=UTF-8 -C -kde \
@@ -18,7 +22,7 @@ xgettext --from-code=UTF-8 -C -kde \
     --package-name="VRGB Keyboard Lighting" \
     --msgid-bugs-address="https://github.com/vrgb-dev/vrgb/issues" \
     -o "$POT" \
-    "$BASE"/package/contents/ui/*.qml
+    package/contents/ui/*.qml
 
 echo "Wrote ${POT#"$BASE"/}"
 
