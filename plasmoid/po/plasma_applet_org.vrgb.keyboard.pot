@@ -18,7 +18,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 
 #: package/contents/ui/main.qml:77 package/contents/ui/main.qml:367
-msgid "Keyboard Lighting"
+msgid "Colour"
 msgstr ""
 
 #: package/contents/ui/main.qml:78
