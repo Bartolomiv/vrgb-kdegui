@@ -8,10 +8,12 @@
         ],
         "Category": "Utilities",
         "Description": "Set the colour and brightness of ASUS Vivobook HID LampArray keyboards",
+        "Description[uk]": "Керування кольором і яскравістю клавіатур ASUS Vivobook з HID LampArray",
         "Icon": "input-keyboard",
         "Id": "org.vrgb.keyboard",
         "License": "MIT",
         "Name": "VRGB Keyboard Lighting",
+        "Name[uk]": "Підсвічування клавіатури VRGB",
         "Version": "0.1.0",
         "Website": "https://github.com/vrgb-dev/vrgb"
     },

@@ -1,0 +1,38 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the VRGB Keyboard Lighting package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: VRGB Keyboard Lighting\n"
+"Report-Msgid-Bugs-To: https://github.com/vrgb-dev/vrgb/issues\n"
+"POT-Creation-Date: 2026-09-03 22:05+0300\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: package/contents/ui/main.qml:51 package/contents/ui/main.qml:187
+msgid "Keyboard Lighting"
+msgstr ""
+
+#: package/contents/ui/main.qml:52
+msgid "Reading configuration…"
+msgstr ""
+
+#: package/contents/ui/main.qml:53
+msgid "#%1 at %2%"
+msgstr ""
+
+#: package/contents/ui/main.qml:104
+msgid "vrgb exited with code %1"
+msgstr ""
+
+#: package/contents/ui/main.qml:256
+msgid "Brightness"
+msgstr ""
