@@ -2,8 +2,14 @@
  * VRGB - Plasma 6 applet for ASUS Vivobook HID LampArray keyboards.
  *
  * State lives in ~/.config/vrgb/config.json, which the applet reads directly.
- * Writes always go through the `vrgb` CLI so the config file has a single
- * owner and the applet never touches hidraw itself.
+ * Colour writes always go through the `vrgb` CLI so the config file has a
+ * single owner and the applet never touches hidraw itself.
+ *
+ * Brightness is deliberately NOT vrgb's own intensity channel. The keyboard
+ * has two controls that multiply together: the asus::kbd_backlight level the
+ * Fn keys and Plasma drive, and vrgb's LampArray intensity. Driving the latter
+ * left the widget out of step with the Fn keys, so the slider here controls
+ * the Plasma backlight and vrgb's intensity stays pinned wide open.
  *
  * SPDX-License-Identifier: MIT
  */
@@ -13,6 +19,7 @@ import QtQuick.Layouts
 import org.kde.plasma.plasmoid
 import org.kde.plasma.components as PlasmaComponents
 import org.kde.plasma.plasma5support as P5Support
+import org.kde.plasma.private.brightnesscontrolplugin
 import org.kde.kirigami as Kirigami
 
 PlasmoidItem {
@@ -22,10 +29,14 @@ PlasmoidItem {
     // always on plasmashell's PATH.
     property string vrgbBin: "vrgb"
     property color currentColor: "#00aa55"
-    property int brightness: 100
     property string errorText: ""
     // Suppresses hardware writes while the UI is being seeded from config.json.
     property bool loading: true
+
+    // Brightness comes from Plasma so the Fn keys and the widget stay in step.
+    readonly property int backlight: kbdBacklight.brightness
+    readonly property int backlightMax: Math.max(1, kbdBacklight.brightnessMax)
+    readonly property real litFraction: backlight / backlightMax
 
     readonly property var presets: [
         "#ff0000", "#ff7f00", "#ffd400", "#7fff00", "#00ff5e", "#00e5ff",
@@ -40,9 +51,9 @@ PlasmoidItem {
     }
 
     // The colour as it should actually appear on the keys.
-    readonly property color litColor: Qt.rgba(currentColor.r * brightness / 100,
-                                              currentColor.g * brightness / 100,
-                                              currentColor.b * brightness / 100, 1)
+    readonly property color litColor: Qt.rgba(currentColor.r * litFraction,
+                                              currentColor.g * litFraction,
+                                              currentColor.b * litFraction, 1)
 
     readonly property string resolveCmd: "command -v vrgb 2>/dev/null || echo /usr/local/bin/vrgb"
     readonly property string readCfgCmd: "cat \"$HOME/.config/vrgb/config.json\" 2>/dev/null"
@@ -50,7 +61,8 @@ PlasmoidItem {
     Plasmoid.icon: "input-keyboard"
     toolTipMainText: i18n("Keyboard Lighting")
     toolTipSubText: loading ? i18n("Reading configuration…")
-                            : i18n("#%1 at %2%", hexColor.toUpperCase(), brightness)
+                            : i18n("#%1 at %2%", hexColor.toUpperCase(),
+                                   Math.round(litFraction * 100))
 
     preferredRepresentation: compactRepresentation
 
@@ -59,9 +71,10 @@ PlasmoidItem {
             return;
         }
         applyTimer.stop();
-        // hexColor is generated locally and brightness is an int, so the
-        // command line is safe to build by concatenation.
-        executable.run(vrgbBin + " set " + hexColor + " " + brightness);
+        // hexColor is generated locally, so the command line is safe to build
+        // by concatenation. The trailing 100 pins vrgb's intensity wide open --
+        // the Plasma backlight level is this applet's brightness control.
+        executable.run(vrgbBin + " set " + hexColor + " 100");
     }
 
     function scheduleApply() {
@@ -79,16 +92,24 @@ PlasmoidItem {
                 cfg = null;
             }
         }
+        var percent = 100;
         if (cfg) {
             if (typeof cfg.color === "string" && /^[0-9a-fA-F]{6}$/.test(cfg.color)) {
                 currentColor = "#" + cfg.color;
             }
             var p = parseInt(cfg.percent, 10);
             if (!isNaN(p)) {
-                brightness = Math.max(0, Math.min(100, p));
+                percent = p;
             }
         }
         loading = false;
+
+        // Normalise once if the CLI (or an older build of this applet) left
+        // vrgb's intensity somewhere other than wide open -- otherwise the
+        // backlight slider could never reach full brightness.
+        if (percent !== 100) {
+            applyNow();
+        }
     }
 
     function handleResult(source, code, out, err) {
@@ -111,6 +132,13 @@ PlasmoidItem {
         // one process per mouse move.
         interval: 60
         onTriggered: root.applyNow()
+    }
+
+    KeyboardBrightnessControl {
+        id: kbdBacklight
+        // The popup shows the level itself; a second OSD on every drag step
+        // would just be noise.
+        isSilent: true
     }
 
     P5Support.DataSource {
@@ -146,9 +174,11 @@ PlasmoidItem {
             anchors.centerIn: parent
             width: Math.min(parent.width, parent.height)
             height: width
-            source: "input-keyboard"
+            // The symbolic variant keeps its key detail when masked; plain
+            // input-keyboard flattens to a solid block.
+            source: "input-keyboard-symbolic"
             isMask: true
-            color: root.brightness > 0 ? root.currentColor : Kirigami.Theme.disabledTextColor
+            color: root.backlight > 0 ? root.currentColor : Kirigami.Theme.disabledTextColor
         }
     }
 
@@ -262,24 +292,36 @@ PlasmoidItem {
 
                 PlasmaComponents.Label {
                     opacity: 0.75
-                    text: root.brightness + "%"
+                    text: root.backlight + " / " + root.backlightMax
                 }
             }
 
             PlasmaComponents.Slider {
-                id: brightnessSlider
+                id: backlightSlider
 
                 Layout.fillWidth: true
+                enabled: kbdBacklight.isBrightnessAvailable
                 from: 0
-                to: 100
+                to: root.backlightMax
                 stepSize: 1
+                snapMode: PlasmaComponents.Slider.SnapAlways
 
-                Component.onCompleted: value = root.brightness
+                // Straight to Plasma: this is a D-Bus property rather than a
+                // subprocess, so it needs no throttling.
+                onMoved: kbdBacklight.brightness = Math.round(value)
+            }
 
-                onMoved: {
-                    root.brightness = Math.round(value);
-                    root.scheduleApply();
-                }
+            // Follows Plasma -- Fn keys, the brightness applet, anything else --
+            // whenever the user is not dragging. Depending on backlightMax as
+            // well as backlight matters: PowerDevil publishes the maximum after
+            // the current value on startup, and without that dependency the
+            // slider can stay clamped against a stale range.
+            Binding {
+                target: backlightSlider
+                property: "value"
+                value: Math.min(root.backlight, root.backlightMax)
+                when: !backlightSlider.pressed
+                restoreMode: Binding.RestoreNone
             }
 
             Kirigami.InlineMessage {
@@ -300,12 +342,6 @@ PlasmoidItem {
 
             function onCurrentColorChanged() {
                 picker.setColor(root.currentColor);
-            }
-
-            function onBrightnessChanged() {
-                if (!brightnessSlider.pressed) {
-                    brightnessSlider.value = root.brightness;
-                }
             }
         }
     }
