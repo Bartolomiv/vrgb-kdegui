@@ -1,0 +1,19 @@
+{
+    "KPackageStructure": "Plasma/Applet",
+    "KPlugin": {
+        "Authors": [
+            {
+                "Name": "vrgb-dev"
+            }
+        ],
+        "Category": "Utilities",
+        "Description": "Set the colour and brightness of ASUS Vivobook HID LampArray keyboards",
+        "Icon": "input-keyboard",
+        "Id": "org.vrgb.keyboard",
+        "License": "MIT",
+        "Name": "VRGB Keyboard Lighting",
+        "Version": "0.1.0",
+        "Website": "https://github.com/vrgb-dev/vrgb"
+    },
+    "X-Plasma-API-Minimum-Version": "6.0"
+}
